@@ -1,16 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 import "./../app/app.css";
 import { Amplify } from "aws-amplify";
 import outputs from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
-
+import { signIn, getCurrentUser } from "aws-amplify/auth";
 Amplify.configure(outputs);
 
 const client = generateClient<Schema>();
+
+interface SignInFormElements extends HTMLFormControlsCollection {
+  email: HTMLInputElement;
+  password: HTMLInputElement;
+}
+
+interface SignInForm extends HTMLFormElement {
+  readonly elements: SignInFormElements;
+}
 
 export default function App() {
   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
@@ -29,6 +38,26 @@ export default function App() {
     client.models.Todo.create({
       content: window.prompt("Todo content"),
     });
+    user()
+  }
+
+  async function user() {
+    const { username, userId, signInDetails } = await getCurrentUser();
+    console.log(username, userId, signInDetails); 
+  }
+  
+  function deleteTodo(id: string) {
+    client.models.Todo.delete({ id });
+  }
+
+  async function handleSubmit(event: FormEvent<SignInForm>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    // ... validate inputs
+    await signIn({
+      username: form.elements.email.value,
+      password: form.elements.password.value,
+    });
   }
 
   return (
@@ -37,7 +66,9 @@ export default function App() {
       <button onClick={createTodo}>+ new</button>
       <ul>
         {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
+          <li onClick={() => deleteTodo(todo.id)} key={todo.id}>
+            {todo.content}
+          </li>
         ))}
       </ul>
       <div>
