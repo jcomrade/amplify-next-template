@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./app.css";
 import ConfigureAmplifyClientSide from "@/components/ConfigureAmplify";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body style={{margin: 0, backgroundColor: "#0F1214"}}>
         <ConfigureAmplifyClientSide />
         {children}
       </body>
