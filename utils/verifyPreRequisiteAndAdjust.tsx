@@ -1,16 +1,25 @@
     // Function to find the column number of the prerequisite
-  const findPreReqColumn = (preReqCode, subjects) => {
-    const preReqSubject = subjects.find(subj => subj.courseCode === preReqCode);
+    interface Card {
+      courseDescription: string;
+      id: string;
+      column: number;
+      courseCode: string;
+      units: number;
+      status: string;
+      preRequisite: string[],
+      coRequisite: string[],
+      error?: string | JSX.Element;
+    }
+
+    const findPreReqColumn = (preReqCode: string[], subjects: Card[]) => {
+    const preReqSubject = subjects.find(subj => preReqCode.includes(subj.courseCode));
     return preReqSubject ? preReqSubject.column : -1;
   };
   
   // Function to check column validation
-  export const validateSubjectColumns = (subjects) => {
+  export const validateSubjectColumns = (subjects: Card[]) => {
     subjects.forEach(subject => {
       const { courseCode, column, preRequisite } = subject;
-  
-      // Skip subjects with no prerequisites
-      if (preRequisite === "None") return;
   
       const preReqColumn = findPreReqColumn(preRequisite, subjects);
   
