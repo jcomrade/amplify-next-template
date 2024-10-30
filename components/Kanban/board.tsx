@@ -124,7 +124,6 @@ export const Board = () => {
               key={index}
               title={semester}
               column={index}
-              headingColor="text-neutral-500"
               cards={subjectCards}
               setCards={validateSubjectColumns} // Pass the setter so child components can trigger updates
             />

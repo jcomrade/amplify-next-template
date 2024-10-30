@@ -13,15 +13,16 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  try {
-    const {tokens, credentials, identityId, userSub} = await fetchAuthSession();
-    if(!tokens){
-      redirect('/login');
-    }
-  } catch (error) {
-    console.log(error)
-    redirect('/login');
-  }
+  // try {
+  //   const auth = await fetchAuthSession();
+  //   console.log(auth)
+  //   if(!auth.tokens){
+  //     redirect('/login');
+  //   }
+  // } catch (error) {
+  //   console.log(error)
+  //   redirect('/login');
+  // }
   return (
       <div style={{ margin: 0 }}>
         <ProfileTab />

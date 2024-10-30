@@ -1,18 +1,37 @@
-import { useState } from "react";
+import { useState, DragEvent } from "react";
 import DropIndicator from "./dropIndicator";
 import StudentCard from "./card";
-import AddCard from "./addCard";
+// import AddCard from "./addCard";
 import styles from "@/styles/global.module.scss";
 
-export const Column = ({ title, headingColor, cards, column, setCards }) => {
+interface Card {
+  courseDescription: string;
+  id: string;
+  column: number;
+  courseCode: string;
+  units: number;
+  status: string;
+  preRequisite: string[],
+  coRequisite: string[],
+  error?: string | JSX.Element;
+}
+
+interface ColumnProps {
+  title: string;
+  cards: Card[];
+  column: number;
+  setCards: React.Dispatch<React.SetStateAction<Card[]>>;
+}
+
+export const Column: React.FC<ColumnProps> = ({ title, cards, column, setCards }) => {
   const [active, setActive] = useState(false);
 
-  const handleDragStart = (e, card) => {
-    console.log("card :", card);
+  const handleDragStart = (e: DragEvent<HTMLDivElement>, card: Card) => {
+    console.log("card:", card);
     e.dataTransfer.setData("cardId", card.id);
   };
 
-  const handleDragEnd = (e) => {
+  const handleDragEnd = (e: DragEvent<HTMLDivElement>) => {
     const cardId = e.dataTransfer.getData("cardId");
     setActive(false);
     clearHighlights();
@@ -24,7 +43,6 @@ export const Column = ({ title, headingColor, cards, column, setCards }) => {
 
     if (before !== cardId) {
       let copy = [...cards];
-
       let cardToTransfer = copy.find((c) => c.id === cardId);
       if (!cardToTransfer) return;
       cardToTransfer = { ...cardToTransfer, column };
@@ -46,42 +64,39 @@ export const Column = ({ title, headingColor, cards, column, setCards }) => {
     }
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     highlightIndicator(e);
-
     setActive(true);
   };
 
-  const clearHighlights = (els) => {
+  const clearHighlights = (els?: HTMLElement[]) => {
     const indicators = els || getIndicators();
-
     indicators.forEach((i) => {
       i.style.opacity = "0";
     });
   };
 
-  const highlightIndicator = (e) => {
+  const highlightIndicator = (e: DragEvent<HTMLDivElement>) => {
     const indicators = getIndicators();
-
     clearHighlights(indicators);
-
     const el = getNearestIndicator(e, indicators);
-
     el.element.style.opacity = "1";
   };
 
-  const getNearestIndicator = (e, indicators) => {
+  const getNearestIndicator = (
+    e: DragEvent<HTMLDivElement>,
+    indicators: HTMLElement[]
+  ) => {
     const DISTANCE_OFFSET = 50;
 
-    const el = indicators.reduce(
+    return indicators.reduce(
       (closest, child) => {
         const box = child.getBoundingClientRect();
-
         const offset = e.clientY - (box.top + DISTANCE_OFFSET);
 
         if (offset < 0 && offset > closest.offset) {
-          return { offset: offset, element: child };
+          return { offset, element: child };
         } else {
           return closest;
         }
@@ -91,12 +106,10 @@ export const Column = ({ title, headingColor, cards, column, setCards }) => {
         element: indicators[indicators.length - 1],
       }
     );
-
-    return el;
   };
 
   const getIndicators = () => {
-    return Array.from(document.querySelectorAll(`[data-column="${column}"]`));
+    return Array.from(document.querySelectorAll(`[data-column="${column}"]`)) as HTMLElement[];
   };
 
   const handleDragLeave = () => {
@@ -105,8 +118,7 @@ export const Column = ({ title, headingColor, cards, column, setCards }) => {
   };
 
   const filteredCards = cards.filter((c) => c.column === column);
-
-  const subjectsUnitsSum = filteredCards.reduce((sum, c) => sum + c.units, 0); // Sum up the units of the filtered cards
+  const subjectsUnitsSum = filteredCards.reduce((sum, c) => sum + c.units, 0);
 
   return (
     <div className={styles.container}>
@@ -118,15 +130,13 @@ export const Column = ({ title, headingColor, cards, column, setCards }) => {
         onDrop={handleDragEnd}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`${styles.content} ${
-          active ? styles.active : styles.inactive
-        }`}
+        className={`${styles.content} ${active ? styles.active : styles.inactive}`}
       >
-        {filteredCards.map((c) => {
-          return <StudentCard key={c.id} {...c} handleDragStart={handleDragStart} />;
-        })}
+        {filteredCards.map((c:Card) => (
+          <StudentCard key={c.id} cardDetails ={c} handleDragStart={handleDragStart} />
+        ))}
         <DropIndicator beforeId={null} column={column} />
-        <AddCard column={column} setCards={setCards} />
+        {/* <AddCard column={column} setCards={setCards} /> */}
       </div>
     </div>
   );
